@@ -138,7 +138,7 @@ int execute_cmd(vector <string> args)//Execute bin command
         strcat(tmp, "Unknown command: [");
         strcat(tmp, exec_args[0]);
         strcat(tmp, "].\n");
-        write(2, tmp, sizeof(tmp));
+        write(2, tmp, sizeof(char)*100);
         exit(0);
     }
     return status;
@@ -165,6 +165,7 @@ void shell_loop()
     {
         printf("%% ");
         getline(cin, line);
+        if(line.empty()){continue;}
         vector <command> cmd_pack;
         cmd_pack = parse_line(line);
         for(int i = 0; i < cmd_pack.size(); i++)
@@ -256,14 +257,23 @@ void shell_loop()
                 }
                 dup2(stdin_fd, STDIN_FILENO);
                 dup2(stdout_fd, STDOUT_FILENO);
+                for(int o = 3; o < 1024; o++){close(o);}
                 execute_cmd(cmd_pack[i].args);
                 exit(0);
             }
             else
             {
+                int lineEndsWithPipeN = 0;
+                if(cmd_pack[cmd_pack.size()-1].type == "num_pipe" or cmd_pack[cmd_pack.size()-1].type == "err_num_pipe")
+                {
+                    lineEndsWithPipeN = 1;
+                }
                 if(is_target){close(target_infd[0]);}
-                int status;
-                waitpid(pid, &status, 0);
+                if(!lineEndsWithPipeN && (i == cmd_pack.size()-1))
+                {
+                    int status;
+                    waitpid(pid, &status, 0);
+                }
             }
             cmd_no++;
         }
