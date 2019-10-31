@@ -134,7 +134,11 @@ int execute_cmd(vector <string> args)//Execute bin command
     int status = execvp(exec_args[0], exec_args);
     if(status == -1)
     {
-        printf("Unknown command.\n");
+        char tmp[100] = "";
+        strcat(tmp, "Unknown command: [");
+        strcat(tmp, exec_args[0]);
+        strcat(tmp, "].\n");
+        write(2, tmp, sizeof(tmp));
         exit(0);
     }
     return status;
@@ -159,7 +163,7 @@ void shell_loop()
     int cmd_no = 1;
     while(true)
     {
-        printf("> ");
+        printf("%% ");
         getline(cin, line);
         vector <command> cmd_pack;
         cmd_pack = parse_line(line);
